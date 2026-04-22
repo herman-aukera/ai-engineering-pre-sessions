@@ -1,0 +1,38 @@
+{
+  "name": "LIDR - Kimi/DeepSeek",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "waitFor": "onCreateCommand",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "codespaces": {
+      "openFiles": [
+        "README.md"
+      ]
+    },
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-toolsai.jupyter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python"
+      }
+    }
+  },
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"$HOME/.local/bin:$PATH\" && uv python install 3.11 && uv venv && uv pip install openai litellm fastapi uvicorn psycopg2-binary pandas jupyter ipykernel && echo '>>> Entorno listo. uv, Python 3.11, Docker, Jupyter, SDKs instalados.'",
+  "postStartCommand": "docker --version && docker compose version && echo '>>> Docker listo. Ejecuta: docker compose up -d'",
+  "forwardPorts": [8000, 5432, 8888],
+  "portsAttributes": {
+    "8000": { "label": "FastAPI", "onAutoForward": "notify" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+    "8888": { "label": "Jupyter", "onAutoForward": "notify" }
+  },
+  "remoteUser": "root"
+}
