@@ -1,7 +1,7 @@
 {
   "name": "LIDR - Kimi/DeepSeek",
   "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
-  "waitFor": "onCreateCommand",
+  "waitFor": "postCreateCommand",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": false
@@ -26,8 +26,8 @@
       }
     }
   },
-  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"$HOME/.local/bin:$PATH\" && uv python install 3.11 && uv venv && uv pip install openai litellm fastapi uvicorn psycopg2-binary pandas jupyter ipykernel && echo '>>> Entorno listo. uv, Python 3.11, Docker, Jupyter, SDKs instalados.'",
-  "postStartCommand": "docker --version && docker compose version && echo '>>> Docker listo. Ejecuta: docker compose up -d'",
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"$HOME/.local/bin:$PATH\" && uv python install 3.11 && uv venv && uv pip install openai litellm fastapi uvicorn psycopg2-binary pandas jupyter ipykernel && uv run ipython kernel install --user --name=lidr && echo '>>> Entorno listo'",
+  "postStartCommand": "docker --version && docker compose version && uv --version && uv run fastapi --version && echo '>>> Todo listo'",
   "forwardPorts": [8000, 5432, 8888],
   "portsAttributes": {
     "8000": { "label": "FastAPI", "onAutoForward": "notify" },
