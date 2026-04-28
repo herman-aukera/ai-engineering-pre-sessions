@@ -1,0 +1,90 @@
+name: CI - Estimador CAG
+
+on:
+  push:
+    branches: [main, sesion-02-estimador-cag]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout del código
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 2. Setup Python 3.11
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # 3. Instalar uv
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      # 4. Verificar estructura de carpetas
+      - name: Check folder structure
+        run: |
+          test -d estimador-cag/app/routers || exit 1
+          test -d estimador-cag/app/services || exit 1
+          test -d estimador-cag/app/context || exit 1
+          test -f estimador-cag/app/config.py || exit 1
+          test -f estimador-cag/app/main.py || exit 1
+          test -f estimador-cag/.env.example || exit 1
+          test -f estimador-cag/pyproject.toml || exit 1
+          echo "✅ Folder structure OK"
+      
+      # 5. Verificar que .env NO está en el repo (seguridad)
+      - name: Check .env not committed
+        run: |
+          if git ls-files | grep -q "^estimador-cag/\.env$"; then
+            echo "❌ .env should not be committed!"
+            exit 1
+          fi
+          echo "✅ .env not in repo"
+      
+      # 6. Instalar dependencias
+      - name: Install dependencies
+        working-directory: ./estimador-cag
+        run: uv pip install -e .
+      
+      # 7. Verificar sintaxis de Python (sin ejecutar)
+      - name: Check Python syntax
+        working-directory: ./estimador-cag
+        run: |
+          python -m py_compile app/main.py
+          python -m py_compile app/config.py
+          python -m py_compile app/services/llm_service.py
+          python -m py_compile app/routers/estimations.py
+          echo "✅ Python syntax OK"
+      
+      # 8. Verificar que FastAPI puede importar la app
+      - name: Test FastAPI import
+        working-directory: ./estimador-cag
+        run: |
+          uv run python -c "from app.main import app; print('✅ FastAPI app imports correctly')"
+      
+      # 9. Levantar servicio y probar /health
+      - name: Test health endpoint
+        working-directory: ./estimador-cag
+        run: |
+          # Crear .env dummy para testing
+          echo "LLM_TIER=flash" > .env
+          echo "DEEPSEEK_API_KEY=dummy" >> .env
+          echo "KIMI_API_KEY=dummy" >> .env
+          
+          # Levantar en background
+          uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          
+          # Probar health
+          curl -f http://localhost:8000/health || exit 1
+          echo "✅ Health endpoint responds 200"
+          
+          # Matar el proceso
+          pkill -f uvicorn || true
