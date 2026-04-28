@@ -19,10 +19,18 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "charliermarsh.ruff",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "GitHub.vscode-github-actions"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "github.copilot.enable": {
+          "*": true,
+          "plaintext": true,
+          "markdown": true
+        }
       }
     }
   },
