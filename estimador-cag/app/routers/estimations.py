@@ -7,6 +7,8 @@ router = APIRouter(prefix="/api/v1", tags=["estimations"])
 
 class EstimateRequest(BaseModel):
     transcription: str
+    tier: str = "flash"  # opcional, default flash
+
 
 
 class EstimateResponse(BaseModel):
