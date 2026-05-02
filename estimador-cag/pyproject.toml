@@ -1,0 +1,17 @@
+[project]
+name = "estimador-cag"
+version = "0.1.0"
+description = "Estimador de software con arquitectura CAG"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]",
+    "uvicorn[standard]",
+    "pydantic-settings",
+    "openai",
+    "python-dotenv",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+]
